@@ -1,1 +1,21 @@
 Installation information
+
+Django 1.3
+ svn co http://code.djangoproject.com/svn/django/trunk/ django-trunk
+ sudo python setup.py install
+
+
+To setup the local db
+#TODO maybe remove legacy db if exists
+python manage.py syncdb
+
+edit settings.py and ensure the TEMPLATE_PATH is correct
+
+To start the Django Server:
+python manage.py runserver [port]
+
+To view admin interface
+127.0.0.1:[port]/admin
+
+To view test 
+127.0.0.1:[port]/riab_basic 
