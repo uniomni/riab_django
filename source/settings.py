@@ -75,10 +75,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'riab_django.urls'
+ROOT_URLCONF = 'source.urls'
 
+import os
+cwd = os.getcwd() 
 TEMPLATE_DIRS = (
-    '/home/teddunstone/dev/riab_django/sources'
+    cwd
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.

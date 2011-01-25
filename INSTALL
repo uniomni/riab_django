@@ -1,5 +1,26 @@
 Installation information
 
+------------------
+Semi automated way
+------------------
+
+python install_django.py
+
+To start the Django Server:
+python manage.py runserver [port]
+
+To view admin interface
+127.0.0.1:[port]/admin
+
+To view test 
+127.0.0.1:[port]/riab_basic 
+
+
+
+--------------------------------------------
+If the above fails, try the individual steps
+--------------------------------------------
+
 Django 1.3
  svn co http://code.djangoproject.com/svn/django/trunk/ django-trunk
  sudo python setup.py install
@@ -9,7 +30,7 @@ To setup the local db
 #TODO maybe remove legacy db if exists
 python manage.py syncdb
 
-edit settings.py and ensure the TEMPLATE_PATH is correct
+edit settings.py and ensure the TEMPLATE_PATH is correct. It must be the absolute path to ../riab_django/source
 
 To start the Django Server:
 python manage.py runserver [port]
