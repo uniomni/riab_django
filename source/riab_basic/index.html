@@ -1,0 +1,9 @@
+{% if geoservers %}
+  <ul>
+  {% for geoserver in geoservers %}
+       <li><a href="/riab_basic/{{ geoserver.id}}/"{{geoserver.name}}</a></li>
+  {% endfor %}
+  </ul>
+(% else %}
+<p>No geoservers</p>
+{% endif %}
