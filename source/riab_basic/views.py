@@ -4,7 +4,7 @@ from django.template import Context,loader
 from django.http import HttpResponse
 from riab_basic.models import GeoServer
 
-def index(request):
+def index2(request):
         geoservers = GeoServer.objects.all()
         t = loader.get_template('index.html')
         c = Context({'geoservers':geoservers,})
