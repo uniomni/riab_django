@@ -7,18 +7,26 @@
         <link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.2.1/resources/css/ext-all.css" />
         <link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.2.1/examples/shared/examples.css" />
         <script src="http://www.openlayers.org/api/2.10/OpenLayers.js"></script>
-        <script type="text/javascript" src="GeoExt.js"></script>
+        <script type="text/javascript" src="/templates/GeoExt.js"></script>
 
-        <script type="text/javascript" src="riab_map.js"></script>
+<script src="http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6.2&mkt=en-us"></script>
+<script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+        <script type="text/javascript" src="/templates/riab_map.js"></script>
 
     </head>
     <body>
         <div id="desc">
-            <h1>RIAB Django Application</h1>
+<img src="http://www.aifdr.org/riab/aifdr_logo.jpg" width=180 height=180>
+            <h1>Risk in a Box v0.1</h1>
             <p>
-            RIAB Django<p>
-            <p>The js is not minified so it is readable. See
-            <a href="tree.js">tree.js</a>.</p>
+            Instructions for use:
+            <ol>
+              <li>1. Navigate to the area you wish to assess.</li>
+              <li>2. Select the Exposure and Hazard Layers n the tree on the left.</li>
+              <li>3. Click the <b>calculate</b> button in the top left. </li>
+             <li>4. Select the impact layer to show the results.</li>
+            </ol><p>
         </div>
     </body>
 </html>

@@ -7,11 +7,14 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Uncomment the admin/doc line below to enable admin documentation:
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
-    # Uncomment the next line to enable the admin:
-    (r'^admin/', include(admin.site.urls)),
+    (r'^templates/(?P<path>.*)$', 'django.views.static.serve',
+        {'document_root': 'riab_basic'}),
+ 
     (r'^riab_basic/$',ListView.as_view(queryset=GeoServer.objects, context_object_name='geoserver',template_name='riab_basic/index.html')),
+    (r'^admin/', include(admin.site.urls)),
     (r'^riab_basic/(?P<GeoServer_id>\d+)/$',DetailView.as_view(model=GeoServer,template_name='riab_basic/detail.html')),
+    (r'^riab_basic/ajax/(\d*)/$','riab_basic.views.ajax'),
+    (r'^riab_basic/map/(\d*)/$','riab_basic.views.map')
 )

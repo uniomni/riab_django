@@ -19,48 +19,106 @@ Ext.onReady(function() {
 
     var map = new OpenLayers.Map({allOverlays: false})
 
-    var vector = new OpenLayers.Layer.Vector("vector");
- 
-   // ZoomToMaxExtent control, a "button" control
-    action = new GeoExt.Action({
-        control: new OpenLayers.Control.ZoomToMaxExtent(),
-        map: map,
-        text: "calculate",
-        tooltip: "calculate risk"
-    });
-    actions["max_extent"] = action;
-    toolbarItems.push(action);
-    toolbarItems.push("-");
 
+    impact =  new OpenLayers.Layer.WMS("Impact Layers",
+                "http://www.aifdr.org:8080/geoserver/wms", {
+                    layers: [
+//FIXME: This should be done programatically via addLayer or equivalent ... not working
+//       so hard coded
+                        "impact:earthquake_impact_calculated_by_riab"
+                    ],
+                    transparent: true,
+                    format: "image/gif"
+                }, {
+                    isBaseLayer: false,
+                    buffer: 0,
+                    // exclude this layer from layer container nodes
+                    displayInLayerSwitcher: false,
+                    visibility: false,
+                    opacity: 0.5
+                }
+            )
+    //FIXME: Not used at the moment but might be useful - also dosn't seem to work as a control??
+    // taken from openlayers example - create bounding box control
+    var control = new OpenLayers.Control();
+    OpenLayers.Util.extend(control, {
+                    draw: function () {
+                        // this Handler.Box will intercept the shift-mousedown
+                        // before Control.MouseDefault gets to see it
+                        this.box = new OpenLayers.Handler.Box( control,
+                            {"done": this.notice},
+                            {keyMask: OpenLayers.Handler.MOD_SHIFT});
+                        this.box.activate();
+                    },
+
+                    notice: function (bounds) {
+                        var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom)); 
+                        var ur = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.top)); 
+                        alert(ll.lon.toFixed(4) + ", " + 
+                              ll.lat.toFixed(4) + ", " + 
+                              ur.lon.toFixed(4) + ", " + 
+                              ur.lat.toFixed(4));
+                    }
+     });
+     map.addControl(control);
+ 
+//The function to call the Riab Calculate function
     action = new GeoExt.Action({
-        text: "select region",
-        control: new OpenLayers.Control.DrawFeature(
-            vector, OpenLayers.Handler.Polygon
-        ),
+        text: "calculate",
+//FIXME: Getting the bounding box fails with JS error
+/* 
+   var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom));
+   var ur = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.top));
+
+   ll.lon.toFixed(4)
+   ll.lat.toFixed(4)
+   ur.lon.toFixed(4)
+   ur.lat.toFixed(4)
+*/
+
+//FIXME:Need to determine which layers are selected and pass to risk function
+
+        handler: function(){
+        Ext.Msg.alert('Calculate Risk Function', 'This will start the Risk calculation for the given area, hazard and exposure layer. Press OK to continue')
+        Ext.Ajax.request({
+              url: 'http://127.0.0.1:8091/riab_basic/ajax/1/',
+              success: function(response) { 
+                        result= Ext.decode(response.responseText);
+                        Ext.Msg.alert('Calcualte Risk Function','Risk Calculation Complete and added to layer:'+result.geoserver_layer); 
+                        impact.addLayer(result.geoserver_layer);
+                        //FIXME: Add Layer isn't working ... need to request a refresh maybe?
+                },
+              failure: function() {      
+                   Ext.Msg.alert('Click', 'fail'); //response.responseText);
+             },
+       })},
+
         map: map,
         // button options
-        toggleGroup: "draw",
-        allowDepress: false,
-        tooltip: "draw polygon",
+        tooltip: "calculate riab function",
       // check item options
-        group: "draw"
     });             
-    actions["draw_poly"] = action;
+    actions["calculate"] = action;
     toolbarItems.push(action);
 
-
-    //toolbarItems.push({
-    //    text: "menu",
-    //    menu: new Ext.menu.Menu({
-    //        items: [
-                // ZoomToMaxExtent
-    //            actions["max_extent"]
-//                new Ext.menu.CheckItem(actions["draw_poly"]),
-                // Nav
-                //new Ext.menu.CheckItem(actions["nav"]),
-      //      ]
-      //  })
-   // });
+    // Create the exposure layer
+    exposure =  new OpenLayers.Layer.WMS("Exposure Layers",
+                "http://www.aifdr.org:8080/geoserver/wms", {
+                    layers: [
+                        "exposure:Population_2010",
+                        "exposure:AIBEP_schools"
+                    ],
+                    transparent: true,
+                    format: "image/gif"
+                }, {
+                    isBaseLayer: false,
+                    buffer: 0,
+                    // exclude this layer from layer container nodes
+                    displayInLayerSwitcher: false,
+                    visibility: false,
+                    opacity: 0.8
+                }
+            )
 
 
     mapPanel = new GeoExt.MapPanel({
@@ -71,22 +129,28 @@ Ext.onReady(function() {
         tbar: toolbarItems,
         extent: "105.3000035, -8.3749995,110.29,-5.566",
         layers: [
-           new OpenLayers.Layer.WMS("Global",
+          new OpenLayers.Layer.WMS("Global 2",
                 "http://maps.opengeo.org/geowebcache/service/wms", {
                     layers: "bluemarble"
                 }, {
                     buffer: 0
                 }
             ),
+             /*new OpenLayers.Layer.Google("Global",
+                                                 {type: google.maps.MapTypeId.TERRAIN}
+                                                ),
+*/
 
             // create a group layer (with several layers in the "layers" param)
             // to show how the LayerParamLoader works
-            new OpenLayers.Layer.WMS("Group Layer",
-                "http://127.0.0.1:8080/geoserver/wms", {
+            exposure,
+            
+            new OpenLayers.Layer.WMS("Hazard Layers",
+                "http://www.aifdr.org:8080/geoserver/wms", {
                     layers: [
-                        "futnuh:mmi_lembang_68",
-                        "futnuh:bridge_S68_WestJava" ,
-			"futnuh:fatality_padang_1_calculated_by_riab",
+                        "hazard:Lembang_Earthquake_Scenario" ,
+                        "hazard:Shakemap_Padang_2009",
+                        "hazard:Earthquake_Ground_Shaking"
                     ],
                     transparent: true,
                     format: "image/gif"
@@ -95,12 +159,14 @@ Ext.onReady(function() {
                     buffer: 0,
                     // exclude this layer from layer container nodes
                     displayInLayerSwitcher: false,
-                    visibility: false
+                    visibility: false,
+                    opacity: 0.6
                 }
-            )
+            ),
+           impact
+
         ]
     });
-
 
 
     // create our own layer node UI class, using the TreeNodeUIEventMixin
@@ -121,9 +187,10 @@ Ext.onReady(function() {
                 uiProvider: "layernodeui"
             }
         }
-    }, {
+    },
+    {
         nodeType: "gx_layer",
-        layer: "Group Layer",
+        layer: "Exposure Layers",
         isLeaf: false,
         // create subnodes for the layers in the LAYERS param. If we assign
         // a loader to a LayerNode and do not provide a loader class, a
@@ -131,7 +198,33 @@ Ext.onReady(function() {
         loader: {
             param: "LAYERS"
         }
-    }], true);
+    },
+   {
+        nodeType: "gx_layer",
+        layer: "Hazard Layers",
+        isLeaf: false,
+        // create subnodes for the layers in the LAYERS param. If we assign
+        // a loader to a LayerNode and do not provide a loader class, a
+        // LayerParamLoader will be assumed.
+        loader: {
+            param: "LAYERS"
+        }
+    },
+  {
+        nodeType: "gx_layer",
+        layer: "Impact Layers",
+        isLeaf: false,
+        // create subnodes for the layers in the LAYERS param. If we assign
+        // a loader to a LayerNode and do not provide a loader class, a
+        // LayerParamLoader will be assumed.
+        loader: {
+            param: "LAYERS"
+        }
+    },
+
+
+
+    ], true);
 
     // create the tree with the configuration from above
     tree = new Ext.tree.TreePanel({
