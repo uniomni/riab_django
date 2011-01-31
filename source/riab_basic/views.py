@@ -13,7 +13,7 @@ def index(request):
         c = Context({'geoservers':geoservers,})
 	return HttpResponse(t.render(c))
 
-def map(request,pk):
+def map(request): #, exposure, hazard, bounding_box):
         t = loader.get_template('riab_basic/riab_map.html')
         c = Context({})
         return HttpResponse(t.render(c))
@@ -24,6 +24,7 @@ def setUpRiabAPI():
       print "Riab Start" 
       return api
 
+# FIXME (Ted): This is just a demonstration showing robust ajax handling.      
 def ajax2(request, pk):
       format='json'
       api=setUpRiabAPI()
@@ -44,47 +45,52 @@ def ajax2(request, pk):
       else:
        return HttpResponse('Not Ajax')
 
-def ajax(request, pk):
-        """Test that impact model can be computed correctly using riab server api through XMLRPC
+def calculate_impact(request, exposure, hazard, bounding_box):
+        """Calculate Impact
+	
+	This is being called by URL's of the form
+	http://127.0.0.1:8091/riab_basic/ajax/Population_2010/Earthquake_Ground_Shaking/1/
         """
+	
         geoserver_url = 'http://www.aifdr.org:8080/geoserver'
         geoserver_username = 'admin'
         geoserver_userpass = 'geoserver'
         # Common variables
         bounding_box = [96.956, -5.519, 104.641, 2.289]
 
-
+	exposure_data = exposure
+	hazard_level = hazard
+	
         api=setUpRiabAPI()
         
-        exposure_data, hazard_level = 'Population_2010', 'Earthquake_Ground_Shaking'
 
-            # Create handles for hazard and exposure
+	# Create handles for hazard and exposure
         haz_handle = api.create_geoserver_layer_handle(geoserver_username,
-                                                                geoserver_userpass,
-                                                                geoserver_url,
-                                                                hazard_level,
-                                                                'hazard')
+						       geoserver_userpass,
+						       geoserver_url,
+						       hazard_level,
+						       'hazard')
 
         exp_handle = api.create_geoserver_layer_handle(geoserver_username,
-                                                                geoserver_userpass,
-                                                                geoserver_url,
-                                                                exposure_data,
-                                                                'exposure')
+						       geoserver_userpass,
+						       geoserver_url,
+						       exposure_data,
+						       'exposure')
 
 
-            # Create handle for calculated result
+	# Create handle for calculated result
         imp_handle = api.create_geoserver_layer_handle(geoserver_username,
-                                                                geoserver_userpass,
-                                                                geoserver_url,
-                                                                'earthquake_impact_calculated_by_riab',
-                                                                'impact')
+						       geoserver_userpass,
+						       geoserver_url,
+						       'earthquake_impact_calculated_by_riab',
+						       'impact')
 
-            # Calculate impact using API: using default impact function for the moment
+	# Calculate impact using API: using default impact function for the moment
         api.calculate(haz_handle, exp_handle, 0, imp_handle, bounding_box, '')
         username,userpass,geoserver_url,layer_name,workspace = api.split_geoserver_layer_handle(imp_handle)
         response={'impact_layer_handle': imp_handle,'geoserver_layer': "%s:%s"%(workspace,layer_name)}
         json = simplejson.dumps(response)
 
-        return HttpResponse(json,'application/javascript')
+        return HttpResponse(json, 'application/javascript')
 
 
