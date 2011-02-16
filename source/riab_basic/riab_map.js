@@ -25,7 +25,11 @@ Ext.onReady(function() {
 						   layers: [
 							    //FIXME: This should be done programatically via addLayer or equivalent ... not working
 							    //       so hard coded
-							    "impact:earthquake_impact_calculated_by_riab"
+							    //FIXME (Ole): Commented out as it shows up anyway. Why?
+							    //"impact:earthquake_impact_calculated_by_riab",
+							    
+							    //FIXME (Ole): Added a precomputed national map for demo purposes
+							    "impact:Earthquake_Fatalities_National"
 							    ],
 						   transparent: true,
 						   format: "image/gif"
@@ -81,7 +85,7 @@ Ext.onReady(function() {
 		handler: function(){
 		    Ext.Msg.alert('Calculate Risk Function', 'This will start the Risk calculation for the given area, hazard and exposure layer. Press OK to continue')
 		    Ext.Ajax.request({
-			    url: 'http://127.0.0.1:8091/riab_basic/calculate_impact/Population_2010/Earthquake_Ground_Shaking/1',
+			    url: '/riab_basic/calculate_impact/Population_2010/Earthquake_Ground_Shaking/1',
 			    success: function(response) { 
 				result= Ext.decode(response.responseText);
 				Ext.Msg.alert('Calculate Risk Function', 'Risk Calculation Complete and added to layer:'+result.geoserver_layer);
@@ -162,7 +166,8 @@ Ext.onReady(function() {
 							  layers: [
 								   "hazard:Lembang_Earthquake_Scenario" ,
 								   "hazard:Shakemap_Padang_2009",
-								   "hazard:Earthquake_Ground_Shaking"
+								   "hazard:Earthquake_Ground_Shaking",
+								   "sources:Earthquake_Faults"
 								   ],
 							  transparent: true,
 							  format: "image/gif"

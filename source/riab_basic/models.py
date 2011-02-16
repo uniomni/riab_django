@@ -16,8 +16,8 @@ class GeoServer(models.Model):
       url = models.CharField(max_length=200)
       port = models.IntegerField()
       name = models.CharField(max_length=200)
-      username =models.CharField(max_length=200)
-      password =models.CharField(max_length=200)
+      username = models.CharField(max_length=200)
+      password = models.CharField(max_length=200)
 
       def __unicode__(self):
            return self.name
