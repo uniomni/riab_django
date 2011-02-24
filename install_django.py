@@ -11,6 +11,6 @@ def run(s):
     
 run('cd /tmp; svn co http://code.djangoproject.com/svn/django/trunk/ django-trunk')
 run('cd /tmp/django-trunk; sudo python setup.py install')
-run('cd source; python manage.py syncdb')
+#run('cd source; python manage.py syncdb')
 
 

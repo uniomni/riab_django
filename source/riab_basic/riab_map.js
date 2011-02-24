@@ -99,7 +99,7 @@ Ext.onReady(function() {
 				var wmsLayer = new OpenLayers.Layer.WMS("Layer NAME",
 									"http://www.aifdr.org:8080/geoserver/wms",
 	                                                                {layers: result.geoserver_layer, transparent: true},
-                                                                     	{isBaseLayer : false, isVisible: true});
+	{isBaseLayer : false, isVisible: true, opacity: 0.6});
                                 map.addLayer(wmsLayer);
  				map.controls[0].redraw();
 			    },
@@ -132,7 +132,7 @@ Ext.onReady(function() {
 						 // exclude this layer from layer container nodes
 						 displayInLayerSwitcher: false,
 						 visibility: false,
-						 opacity: 0.8
+						 opacity: 0.6
 					     }
 					     )
 	 
