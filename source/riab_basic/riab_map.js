@@ -144,14 +144,21 @@ Ext.onReady(function() {
 		    map: map,
 		    tbar: toolbarItems,
 		    extent: "105.3000035, -8.3749995,110.29,-5.566",
-		    layers: [
-			     new OpenLayers.Layer.WMS("Global 2",
+		    layers: [new OpenLayers.Layer.WMS("Base Layers",
+						      "http://www.aifdr.org:8080/geoserver/wms", {
+							  layers: "Basemap_600dpi"
+						      }, {
+							  buffer: 0
+						      }
+						      ),
+			     
+			     /*new OpenLayers.Layer.WMS("Base Layers",
 						      "http://maps.opengeo.org/geowebcache/service/wms", {
 							  layers: "bluemarble"
 						      }, {
 							  buffer: 0
 						      }
-						      ),
+						      ),*/
 			     /*new OpenLayers.Layer.Google("Global",
 			       {type: google.maps.MapTypeId.TERRAIN}
 			       ),
