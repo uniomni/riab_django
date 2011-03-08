@@ -12,6 +12,6 @@ urlpatterns = patterns('',
                        (r'^riab_basic/$', ListView.as_view(queryset=GeoServer.objects, context_object_name='geoserver', template_name='riab_basic/index.html')),
                        (r'^admin/', include(admin.site.urls)),
                        (r'^riab_basic/(?P<GeoServer_id>\d+)/$', DetailView.as_view(model=GeoServer, template_name='riab_basic/detail.html')),
-                       (r'^riab_basic/calculate_impact/([a-zA-Z0-9_]*)/([a-zA-Z0-9_]*)/([0-9,]*)/$', 'riab_basic.views.calculate_impact'),
+                       (r'^riab_basic/calculate_impact/([a-zA-Z0-9_,:]*)/([0-9,\-\.]*)/$', 'riab_basic.views.calculate_impact'),
                        (r'^riab_basic/map/$', 'riab_basic.views.map')    
                        )

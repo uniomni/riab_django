@@ -56,7 +56,7 @@ Ext.onReady(function() {
 		},
 		    
                     notice: function (bounds) {
-		    var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom)); 
+                    var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom)); 
 		    var ur = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.top)); 
 		    alert(ll.lon.toFixed(4) + ", " + 
 			  ll.lat.toFixed(4) + ", " + 
@@ -69,23 +69,30 @@ Ext.onReady(function() {
 	//The function to call the Riab Calculate function
 	action = new GeoExt.Action({
 		text: "calculate",
-		//FIXME: Getting the bounding box fails with JS error
-		/* 
-		   var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom));
-		   var ur = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.top));
-		   
-		   ll.lon.toFixed(4)
-		   ll.lat.toFixed(4)
-		   ur.lon.toFixed(4)
-		   ur.lat.toFixed(4)
-		*/
+		 
 		
 		//FIXME:Need to determine which layers are selected and pass to risk function
 		
 		handler: function(){
+      // Get the bounds	
+		    bounds = map .getExtent()
+                   boundingbox=bounds.left.toString()+','+bounds.bottom.toString()+','+bounds.right.toString()+','+bounds.top.toString();
+	    	   console.log('Bounding box:'+boundingbox); 
+
+
+      // Get the selected layers
+		 var selectedLayers=''; 
+ 	 	 tree.root.cascade(function(){
+ 		      if (this.attributes.checked) if (this.attributes.text) selectedLayers+=","+this.attributes.text;
+                 },null,selectedLayers);
+                console.log(selectedLayers)
+
+
+      // Calculated the risk function
+
 		    Ext.Msg.alert('Calculate Risk Function', 'This will start the Risk calculation for the given area, hazard and exposure layer. Press OK to continue')
 		    Ext.Ajax.request({
-			    url: '/riab_basic/calculate_impact/Population_2010/Earthquake_Ground_Shaking/1',
+			    url: '/riab_basic/calculate_impact/'+selectedLayers+'/'+boundingbox+'/',
 			    success: function(response) { 
 				result= Ext.decode(response.responseText);
 				Ext.Msg.alert('Calculate Risk Function', 'Risk Calculation Complete and added to layer:'+result.geoserver_layer);
@@ -101,7 +108,7 @@ Ext.onReady(function() {
 	                                                                {layers: result.geoserver_layer, transparent: true},
 	{isBaseLayer : false, isVisible: true, opacity: 0.6});
                                 map.addLayer(wmsLayer);
- 				map.controls[0].redraw();
+ 				//map.controls[0].redraw();
 			    },
 			    
 			    failure: function() {      
@@ -159,10 +166,10 @@ Ext.onReady(function() {
 							  buffer: 0
 						      }
 						      ),*/
-			     /*new OpenLayers.Layer.Google("Global",
+			    /*new OpenLayers.Layer.Google("Global",
 			       {type: google.maps.MapTypeId.TERRAIN}
-			       ),
-			     */
+			       ),*/
+			     
 			  
 			     // create a group layer (with several layers in the "layers" param)
 			     // to show how the LayerParamLoader works

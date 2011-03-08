@@ -45,22 +45,34 @@ def ajax2(request, pk):
       else:
        return HttpResponse('Not Ajax')
 
-def calculate_impact(request, exposure, hazard, bounding_box):
+def calculate_impact(request, layers, bounding_box):
         """Calculate Impact
 	
 	This is being called by URL's of the form
-	http://127.0.0.1:8091/riab_basic/ajax/Population_2010/Earthquake_Ground_Shaking/1/
+	http://127.0.0.1:8091/riab_basic/ajax/Population_2010/Earthquake_Ground_Shaking/96.956,-5.519,104.641,2.289/
         """
 	
         geoserver_url = 'http://www.aifdr.org:8080/geoserver'
         geoserver_username = 'admin'
         geoserver_userpass = 'geoserver'
         # Common variables
-        bounding_box = [96.956, -5.519, 104.641, 2.289]
+        bounding_box = [float(bv) for bv in bounding_box.split(',')] #[96.956, -5.519, 104.641, 2.289]
+        print 'Bounding Box  : ', str(bounding_box)
 
-	exposure_data = exposure
-	hazard_level = hazard
-	
+        #layers = ",hazard:Population_2010,exposure:Earthquake_Ground_Shaking"
+	for layer in layers.split(','):
+		if len(layer)>0:
+			riabtype=layer.split(':')
+			if len(riabtype)!=2:
+				print "Error in layer string ",layers
+				return
+			if riabtype[0]=='exposure':
+				exposure_data = riabtype[1]
+			elif riabtype[0] == 'hazard':
+				hazard_level = riabtype[1] 
+			else:
+				print "Error in layer ",layer
+        print "hazard = %s, exposure = %s"%(exposure_data,hazard_level)	
         api=setUpRiabAPI()
         
 
