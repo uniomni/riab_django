@@ -94,7 +94,7 @@ def calculate_impact(request, layers, bounding_box):
         imp_handle = api.create_geoserver_layer_handle(geoserver_username,
 						       geoserver_userpass,
 						       geoserver_url,
-						       'earthquake_impact_calculated_by_riab',
+						       'impact_calculated_by_riab',
 						       'impact')
 
 	# Calculate impact using API: using default impact function for the moment

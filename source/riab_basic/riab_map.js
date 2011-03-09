@@ -9,10 +9,18 @@
  */
 
 /* Basic RIAB map view for layers
-*/
+ */
 
 var mapPanel, tree;
 Ext.onReady(function() {
+
+
+	var pbar = new Ext.ProgressBar({
+		id:'pbar3',
+		width:150,
+		renderTo:'p1'
+	    });
+
 	// create a map panel
 	
 	var ctrl, toolbarItems = [], action, actions = {};
@@ -29,7 +37,7 @@ Ext.onReady(function() {
 							    //"impact:earthquake_impact_calculated_by_riab",
 							    
 							    //FIXME (Ole): Added a precomputed national map for demo purposes
-							    "impact:Earthquake_Fatalities_National"
+							    "impact:earthquake_impact_calculated_by_riab"
 							    ],
 						   transparent: true,
 						   format: "image/gif"
@@ -45,76 +53,67 @@ Ext.onReady(function() {
 	    //FIXME: Not used at the moment but might be useful - also dosn't seem to work as a control??
 	    // taken from openlayers example - create bounding box control
 	    var control = new OpenLayers.Control();
-	OpenLayers.Util.extend(control, {
-		draw: function () {
-		    // this Handler.Box will intercept the shift-mousedown
-		    // before Control.MouseDefault gets to see it
-		    this.box = new OpenLayers.Handler.Box( control,
-							   {"done": this.notice},
-							   {keyMask: OpenLayers.Handler.MOD_SHIFT});
-		    this.box.activate();
-		},
-		    
-                    notice: function (bounds) {
-                    var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom)); 
-		    var ur = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.top)); 
-		    alert(ll.lon.toFixed(4) + ", " + 
-			  ll.lat.toFixed(4) + ", " + 
-			  ur.lon.toFixed(4) + ", " + 
-			  ur.lat.toFixed(4));
-		}
-	    });
-	map.addControl(control);
-	
+
 	//The function to call the Riab Calculate function
-	action = new GeoExt.Action({
+ 	    action = new GeoExt.Action({
 		text: "calculate",
 		 
 		
 		//FIXME:Need to determine which layers are selected and pass to risk function
 		
 		handler: function(){
-      // Get the bounds	
+
+		    // Get the bounding box	
 		    bounds = map .getExtent()
-                   boundingbox=bounds.left.toString()+','+bounds.bottom.toString()+','+bounds.right.toString()+','+bounds.top.toString();
-	    	   console.log('Bounding box:'+boundingbox); 
+		    boundingbox=bounds.left.toString()+','+bounds.bottom.toString()+','+bounds.right.toString()+','+bounds.top.toString();
+		    console.log('Bounding box:'+boundingbox); 
 
 
-      // Get the selected layers
-		 var selectedLayers=''; 
- 	 	 tree.root.cascade(function(){
- 		      if (this.attributes.checked) if (this.attributes.text) selectedLayers+=","+this.attributes.text;
-                 },null,selectedLayers);
-                console.log(selectedLayers)
+		    // Get the selected layers
+		    var selectedLayers=''; 
+		    tree.root.cascade(function(){
+			    if (this.attributes.checked) if (this.attributes.text) selectedLayers+=","+this.attributes.text;
+			},null,selectedLayers);
+		    console.log(selectedLayers)
 
 
-      // Calculated the risk function
+		    // Calculated the risk function
+		    pbar.wait({
+			    interval:50,
+				duration:50000,
+				increment:15,
+		 
+			});
+
 
 		    Ext.Msg.alert('Calculate Risk Function', 'This will start the Risk calculation for the given area, hazard and exposure layer. Press OK to continue')
 		    Ext.Ajax.request({
 			    url: '/riab_basic/calculate_impact/'+selectedLayers+'/'+boundingbox+'/',
-			    success: function(response) { 
+				success: function(response) {
+				pbar.reset(); 
 				result= Ext.decode(response.responseText);
-				Ext.Msg.alert('Calculate Risk Function', 'Risk Calculation Complete and added to layer:'+result.geoserver_layer);
-				
+				Ext.Msg.alert('Calculate Risk Function', 'Risk Calculation Complete for '+selectedLayers+' and added to layer:'+result.geoserver_layer);
+				//pbar.stop()
 				// Remove previous layer
 				layers = map.getLayersByName("Layer NAME");
 				
 				if (layers.length > 0) {
 				    map.removeLayer(layers[0]);
-				}				
+				}
+				console.log(result.geoserver_layer)
 				var wmsLayer = new OpenLayers.Layer.WMS("Layer NAME",
 									"http://www.aifdr.org:8080/geoserver/wms",
 	                                                                {layers: result.geoserver_layer, transparent: true},
-	{isBaseLayer : false, isVisible: true, opacity: 0.6});
+									{isBaseLayer : false, isVisible: true, opacity: 0.6});
                                 map.addLayer(wmsLayer);
+                                
  				//map.controls[0].redraw();
 			    },
 			    
-			    failure: function() {      
+				failure: function() {      
 				Ext.Msg.alert('Click', 'Ajax call failed'); //response.responseText);
 			    },
-			})},
+				})},
 		
 		map: map,
 		// button options
@@ -153,20 +152,20 @@ Ext.onReady(function() {
 		    extent: "105.3000035, -8.3749995,110.29,-5.566",
 		    layers: [new OpenLayers.Layer.WMS("Base Layers",
 						      "http://www.aifdr.org:8080/geoserver/wms", {
-							  layers: "Basemap_600dpi"
+							  layers: "Basemap_300dpi"
 						      }, {
 							  buffer: 0
 						      }
 						      ),
 			     
 			     /*new OpenLayers.Layer.WMS("Base Layers",
-						      "http://maps.opengeo.org/geowebcache/service/wms", {
-							  layers: "bluemarble"
-						      }, {
-							  buffer: 0
-						      }
-						      ),*/
-			    /*new OpenLayers.Layer.Google("Global",
+			       "http://maps.opengeo.org/geowebcache/service/wms", {
+			       layers: "bluemarble"
+			       }, {
+			       buffer: 0
+			       }
+			       ),*/
+			     /*new OpenLayers.Layer.Google("Global",
 			       {type: google.maps.MapTypeId.TERRAIN}
 			       ),*/
 			     
@@ -194,8 +193,8 @@ Ext.onReady(function() {
 							  opacity: 0.6
 						      }
 						      ),
-			     impact
-			  
+		       
+			         impact
 			     ]
 		});
      
